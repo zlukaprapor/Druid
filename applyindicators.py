@@ -1,37 +1,37 @@
 import pandas as pd
 
+# Шляхи до файлів
 EURUSDM1 = r"C:\Users\Oleksii\PycharmProjects\Druid\fundamental_data\EURUSDM1.csv"
 TECHNICAL_DATA_EURUSDM1 = r"C:\Users\Oleksii\PycharmProjects\Druid\fundamental_data\technical_data_eurusd.csv"
 
-# Завантажуємо вихідний CSV файл
+# Завантаження вихідного CSV файлу
 df = pd.read_csv(EURUSDM1, encoding='utf-16', header=None)
 
-# Задаємо назви колонок
+# Встановлення назв колонок
 df.columns = ['Date', 'Open', 'High', 'Low', 'Close', 'Volume', 'Other']
 
-# Перетворюємо стовпець 'Date' на datetime формат
+# Перетворення стовпця 'Date' у формат datetime
 df['Date'] = pd.to_datetime(df['Date'], format='%Y.%m.%d %H:%M')
 
-# Створюємо новий стовпець 'Local time' у форматі 'dd.mm.yyyy hh:mm:ss.000 GMT+0200'
+# Додавання стовпця 'Local time' у заданому форматі
 df['Local time'] = df['Date'].dt.strftime('%d.%m.%Y %H:%M:%S.000 GMT+0200')
 
-# Створюємо нову DataFrame з потрібними колонками
+# Формування нового DataFrame з потрібними колонками
 df_new = df[['Local time', 'Open', 'High', 'Low', 'Close', 'Volume']]
 
-data = pd.DataFrame
-
+# Копіювання лише стовпця 'Close' для подальших обчислень
 data = df[['Close']].copy()
 
-# Add moving average, window = 10
+# Додавання ковзної середньої (Moving Average) з вікном 10
 data['MA10'] = df['Close'].rolling(10).mean()
 
-# Add MACD
-exp1 = data['Close'].ewm(span=12, adjust=False).mean()
-exp2 = data['Close'].ewm(span=26, adjust=False).mean()
-macd = exp1 - exp2
+# Додавання MACD (Moving Average Convergence Divergence)
+exp1 = data['Close'].ewm(span=12, adjust=False).mean()  # Швидка EMA
+exp2 = data['Close'].ewm(span=26, adjust=False).mean()  # Повільна EMA
+macd = exp1 - exp2  # Різниця між EMA
 data['MACD'] = macd
 
-# Add ROC, period = 2
+# Додавання ROC (Rate of Change) з періодом 2
 n_steps = 2
 
 
@@ -41,7 +41,7 @@ def my_fun(x):
 
 data['ROC'] = data['Close'].rolling(n_steps).apply(my_fun)
 
-# Add Momentum, period = 4
+# Додавання Momentum з періодом 4
 n_steps = 4
 
 
@@ -51,37 +51,38 @@ def my_fun(x):
 
 data['Momentum'] = data['Close'].rolling(n_steps).apply(my_fun)
 
-# Add RSI
-# get the price diff
-delta = data['Close'].diff()
+# Додавання RSI (Relative Strength Index)
+delta = data['Close'].diff()  # Зміна ціни
 
-# positive gains (up) and negative gains (down) Series
+# Виділення позитивних і негативних змін
 up, down = delta.copy(), delta.copy()
-up[up < 0] = 0
-down[down > 0] = 0
+up[up < 0] = 0  # Залишаємо лише зростання
+down[down > 0] = 0  # Залишаємо лише спадання
 
+# Розрахунок середнього приросту і втрати
 period = 10
-
 _gain = up.ewm(alpha=1.0 / period, adjust=True).mean()
 _loss = down.abs().ewm(alpha=1.0 / period, adjust=True).mean()
 RS = _gain / _loss
 
+# Обчислення RSI
 data["RSI"] = 100 - (100 / (1 + RS))
 
-# Add Bollinger Bands , period = 20
+# Додавання верхньої та нижньої меж Bollinger Bands
+typical_price = (df['Close'] + df['Low'] + df['High']) / 3  # Типова ціна
+std = typical_price.rolling(20).std(ddof=0)  # Стандартне відхилення
+ma_tp = typical_price.rolling(20).mean()  # Ковзна середня
+data['BOLU'] = ma_tp + 2 * std  # Верхня межа
+data['BOLD'] = ma_tp - 2 * std  # Нижня межа
 
-typical_price = (df['Close'] + df['Low'] + df['High']) / 3
-std = typical_price.rolling(20).std(ddof=0)
-ma_tp = typical_price.rolling(20).mean()
-data['BOLU'] = ma_tp + 2 * std
-data['BOLD'] = ma_tp - 2 * std
-
-# Add CCI Commodity channel index, period = 20
+# Додавання CCI (Commodity Channel Index)
 tp_rolling = typical_price.rolling(20)
 
-# calculate mean deviation
+# Розрахунок середнього відхилення
 mad = tp_rolling.apply(lambda s: abs(s - s.mean()).mean(), raw=True)
 
+# Обчислення CCI
 data["CCI"] = (typical_price - tp_rolling.mean()) / (0.015 * mad)
 
+# Збереження оброблених даних у новий CSV файл
 data.to_csv(TECHNICAL_DATA_EURUSDM1)
