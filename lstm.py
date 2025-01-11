@@ -1,12 +1,12 @@
-import matplotlib.pyplot as plt  # Для побудови графіків
-import numpy as np  # Для роботи з масивами та числовими обчисленнями
+import matplotlib.pyplot as plt
+import numpy as np
 import logging
 import time
-from pandas import read_csv  # Для роботи з CSV-файлами
-from sklearn.metrics import mean_absolute_error, mean_squared_error  # Метрики оцінки моделі
-from sklearn.preprocessing import MinMaxScaler  # Для нормалізації даних
-from tensorflow.python.keras.layers import Activation, Dense, LSTM  # Шари нейронної мережі
-from tensorflow.python.keras.models import Sequential  # Тип нейронної мережі
+from pandas import read_csv
+from sklearn.metrics import mean_absolute_error, mean_squared_error
+from sklearn.preprocessing import MinMaxScaler
+from tensorflow.python.keras.layers import Activation, Dense, LSTM
+from tensorflow.python.keras.models import Sequential
 
 # Шляхи до файлів з даними та для збереження моделі
 TECHNICAL_DATA_EURUSDM1 = r"C:\Users\Oleksii\PycharmProjects\Druid\fundamental_data\technical_data_eurusd.csv"
@@ -32,7 +32,7 @@ dataset = dataframe.values
 dataset = dataset.astype('float32')  # Перетворення даних у формат float32
 
 # Обрізання перших 20 значень і видалення першого стовпця (заголовки)
-dataset = dataset[20:]  # Видалення перших 20 рядків
+dataset = dataset[30:]  # Видалення перших 20 рядків
 dataset = dataset[:, 1:]  # Видалення першого стовпця
 
 # Нормалізація даних у діапазоні [0, 1]
@@ -70,7 +70,7 @@ model.add(Activation('sigmoid'))  # Активаційна функція
 model.compile(loss='mean_squared_error', optimizer='adam')  # Налаштування моделі
 
 # Навчання моделі
-model.fit(trainX, trainY, epochs=50, batch_size=256, verbose=1)
+model.fit(trainX, trainY, epochs=30, batch_size=256, verbose=1)
 
 # Збереження навченої моделі
 model.save(SAVE_PROD_MODEL)
@@ -113,15 +113,15 @@ scaled_mae = mean_absolute_error(testY, testPredict)
 original_mae = mean_absolute_error(inverse_transform(testY), inverse_transform(testPredict))
 
 # Виведення метрик
-logging.info(f'Test Score: {testScore:.6f} RMSE')
-logging.info("Scaled RMSE:", scaled_rmse)
-logging.info("Original RMSE:", original_rmse)
-logging.info("Scaled MAE:", scaled_mae)
-logging.info("Original MAE:", original_mae)
+print(f'Test Score: {testScore:.6f} RMSE')
+print("Scaled RMSE:", scaled_rmse)
+print("Original RMSE:", original_rmse)
+print("Scaled MAE:", scaled_mae)
+print("Original MAE:", original_mae)
 
 # Виведення останніх 5 передбачень і реальних значень
-logging.info("Test Predictions (Last 5):", testPredict[-5:])
-logging.info("Actual Values (Last 5):", testY[-5:])
+print("Test Predictions (Last 5):", testPredict[-5:])
+print("Actual Values (Last 5):", testY[-5:])
 
 # Кінець вимірювання часу
 end_time = time.time()

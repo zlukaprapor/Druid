@@ -75,7 +75,7 @@ This table shows the prediction results of the ensemble model for various experi
 
 ## File descriptions
 
-applyindicators.py - Applies 8 different technical indicators to raw data, and outputs data.csv. Note that the first few lines of the output file will have some NaN values some indicators require a few time steps before starting.
+`applyindicators.py - Applies 8 different technical indicators to raw data, and outputs data.csv. Note that the first few lines of the output file will have some NaN values some indicators require a few time steps before starting.
 
 lstm.py - Takes what applyindicators.py outputted and trains a lstm model, then saves the model into mymodel file. 
 
@@ -83,7 +83,7 @@ plot.py - Runs predictions from a saved model.
 
 Threshold.py - has function get_threshold() to get best threshold when given pandas dataframe of closing prices
 
-## Debug
+## Debug`
 
 I always get an import error when following tensorflow tutorials. To fix it I changed 
 ```
