@@ -1,17 +1,17 @@
 import pandas as pd
 
 # Шляхи до файлів
-EURUSDM1 = r"C:\Users\Oleksii\PycharmProjects\Druid\fundamental_data\EURUSDM1.csv"
-TECHNICAL_DATA_EURUSDM1 = r"C:\Users\Oleksii\PycharmProjects\Druid\fundamental_data\technical_data_eurusd.csv"
+EURUSD_M1 = r"C:\Users\Oleksii\PycharmProjects\Druid\fundamental_data\EURUSD_M1.csv"
+TECHNICAL_DATA_EURUSD_M1 = r"C:\Users\Oleksii\PycharmProjects\Druid\fundamental_data\technical_data_eurusd_m1.csv"
 
 # Завантаження вихідного CSV файлу
-df = pd.read_csv(EURUSDM1, encoding='utf-16', header=None)
+df = pd.read_csv(EURUSD_M1)
 
 # Встановлення назв колонок
-df.columns = ['Date', 'Open', 'High', 'Low', 'Close', 'Volume', 'Other']
+#df.columns = ['Date', 'Open', 'High', 'Low', 'Close', 'Volume', 'Other']
 
 # Перетворення стовпця 'Date' у формат datetime
-df['Date'] = pd.to_datetime(df['Date'], format='%Y.%m.%d %H:%M')
+df['Date'] = pd.to_datetime(df['Date'], format='%Y-%m-%d %H:%M:%S')
 
 # Додавання стовпця 'Local time' у заданому форматі
 df['Local time'] = df['Date'].dt.strftime('%d.%m.%Y %H:%M:%S.000 GMT+0200')
@@ -85,4 +85,9 @@ mad = tp_rolling.apply(lambda s: abs(s - s.mean()).mean(), raw=True)
 data["CCI"] = (typical_price - tp_rolling.mean()) / (0.015 * mad)
 
 # Збереження оброблених даних у новий CSV файл
-data.to_csv(TECHNICAL_DATA_EURUSDM1)
+data.to_csv(TECHNICAL_DATA_EURUSD_M1)
+print(f"Дані збережено у файл: {TECHNICAL_DATA_EURUSD_M1}")
+print("Перші два рядки:")
+print(data.head(2))
+print("\nОстанні два рядки:")
+print(data.tail(2))

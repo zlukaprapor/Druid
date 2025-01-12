@@ -7,12 +7,12 @@ from sklearn.metrics import mean_squared_error
 from threshold import get_threshold
 import tensorflow as tf
 
-SAVE_PROD_MODEL = r"C:\Users\Oleksii\PycharmProjects\Druid\fundamental_data\prob_model.h5"
-TECHNICAL_DATA_EURUSDM1 = r"C:\Users\Oleksii\PycharmProjects\Druid\fundamental_data\technical_data_eurusd.csv"
+TECHNICAL_DATA_EURUSD_M1 = r"C:\Users\Oleksii\PycharmProjects\Druid\fundamental_data\technical_data_eurusd_m1.csv"
+SAVE_PROD_MODEL_EURUSD_M1 = r"C:\Users\Oleksii\PycharmProjects\Druid\fundamental_data\prob_model_eurusd_m1.h5"
 
 
 # Завантаження даних
-dataframe = read_csv(TECHNICAL_DATA_EURUSDM1, engine='python')
+dataframe = read_csv(TECHNICAL_DATA_EURUSD_M1, engine='python')
 dataset = dataframe.values.astype('float32')
 
 # Відкидаємо перші 20 рядків
@@ -46,7 +46,7 @@ trainX = np.reshape(trainX, (trainX.shape[0], look_back, trainX.shape[2]))
 testX = np.reshape(testX, (testX.shape[0], look_back, testX.shape[2]))
 
 # Завантаження моделі
-model = tf.keras.models.load_model(SAVE_PROD_MODEL)
+model = tf.keras.models.load_model(SAVE_PROD_MODEL_EURUSD_M1)
 
 # Прогнозування
 trainPredict = np.squeeze(model.predict(trainX))
@@ -103,7 +103,7 @@ testPredict = np.delete(testPredict, -1)
 testY = np.delete(testY, 0)
 
 # Візуалізація результатів
-plt.plot(testPredict, color="blue", label="Prediction")
+plt.plot(testPredict, color="blue", label="Predictions")
 plt.plot(testY, color="red", label="Actual")
 plt.legend()
 plt.show()

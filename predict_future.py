@@ -7,8 +7,8 @@ from sklearn.metrics import mean_squared_error
 from threshold import get_threshold
 import tensorflow as tf
 
-SAVE_PROD_MODEL = r"C:\Users\Oleksii\PycharmProjects\Druid\fundamental_data\prob_model.h5"
-TECHNICAL_DATA_EURUSDM1 = r"C:\Users\Oleksii\PycharmProjects\Druid\fundamental_data\technical_data_eurusd.csv"
+TECHNICAL_DATA_EURUSD_M1 = r"C:\Users\Oleksii\PycharmProjects\Druid\fundamental_data\technical_data_eurusd_m1.csv"
+SAVE_PROD_MODEL_EURUSD_M1 = r"C:\Users\Oleksii\PycharmProjects\Druid\fundamental_data\prob_model_eurusd_m1.h5"
 
 
 def predict_future_trend(n_future_steps=10):
@@ -16,8 +16,12 @@ def predict_future_trend(n_future_steps=10):
     Виправлена функція для прогнозування майбутніх значень тренду
     """
     # Завантаження та підготовка даних
-    dataframe = read_csv(TECHNICAL_DATA_EURUSDM1, engine='python')
-    dataset = dataframe.values.astype('float32')
+    try:
+        dataframe = read_csv(TECHNICAL_DATA_EURUSD_M1, engine='python')
+        dataset = dataframe.values.astype('float32')
+    except Exception as e:
+        print(f"Помилка при завантаженні даних: {str(e)}")
+        raise
 
     # Видаляємо перші 20 рядків та перший стовпець
     dataset = dataset[20:]
@@ -33,7 +37,11 @@ def predict_future_trend(n_future_steps=10):
     feature_count = dataset.shape[1]
 
     # Завантажуємо модель
-    model = tf.keras.models.load_model(SAVE_PROD_MODEL)
+    try:
+        model = tf.keras.models.load_model(SAVE_PROD_MODEL_EURUSD_M1)
+    except Exception as e:
+        print(f"Помилка при завантаженні моделі: {str(e)}")
+        raise
 
     # Беремо останні реальні дані
     last_real_data = dataset[-look_back:]
@@ -137,7 +145,7 @@ if __name__ == "__main__":
         future_predictions = predict_future_trend(n_future)
 
         # Отримуємо порогове значення
-        dataframe = read_csv(TECHNICAL_DATA_EURUSDM1, engine='python')
+        dataframe = read_csv(TECHNICAL_DATA_EURUSD_M1, engine='python')
         threshold = get_threshold(dataframe["Close"])
 
         # Аналізуємо тренди

@@ -9,9 +9,9 @@ from tensorflow.python.keras.layers import Activation, Dense, LSTM
 from tensorflow.python.keras.models import Sequential
 
 # Шляхи до файлів з даними та для збереження моделі
-TECHNICAL_DATA_EURUSDM1 = r"C:\Users\Oleksii\PycharmProjects\Druid\fundamental_data\technical_data_eurusd.csv"
-SAVE_PROD_MODEL = r"C:\Users\Oleksii\PycharmProjects\Druid\fundamental_data\prob_model.h5"
-FILE_LOG = r"C:\Users\Oleksii\PycharmProjects\Druid\log\model_technical.log"
+TECHNICAL_DATA_EURUSD_M1 = r"C:\Users\Oleksii\PycharmProjects\Druid\fundamental_data\technical_data_eurusd_m1.csv"
+SAVE_PROD_MODEL_EURUSD_M1 = r"C:\Users\Oleksii\PycharmProjects\Druid\fundamental_data\prob_model_eurusd_m1.h5"
+FILE_LOG = r"C:\Users\Oleksii\PycharmProjects\Druid\log\model_eurusd_m1.log"
 
 # Налаштування логування
 logging.basicConfig(
@@ -27,7 +27,7 @@ start_time = time.time()
 logging.info("Модель почала навчатися")
 
 # Завантаження даних з CSV-файлу
-dataframe = read_csv(TECHNICAL_DATA_EURUSDM1, engine='python')
+dataframe = read_csv(TECHNICAL_DATA_EURUSD_M1, engine='python')
 dataset = dataframe.values
 dataset = dataset.astype('float32')  # Перетворення даних у формат float32
 
@@ -73,7 +73,7 @@ model.compile(loss='mean_squared_error', optimizer='adam')  # Налаштува
 model.fit(trainX, trainY, epochs=30, batch_size=256, verbose=1)
 
 # Збереження навченої моделі
-model.save(SAVE_PROD_MODEL)
+model.save(SAVE_PROD_MODEL_EURUSD_M1)
 
 # Передбачення на навчальній і тестовій вибірках
 trainPredict = model.predict(trainX)

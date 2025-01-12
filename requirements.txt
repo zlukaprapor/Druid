@@ -56,3 +56,5 @@ Werkzeug==2.2.2
 wrapt==1.14.1
 zipp==3.11.0
 torch~=2.5.1
+yfinance~=0.2.51
+MetaTrader5~=5.0.4738
