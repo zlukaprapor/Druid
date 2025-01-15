@@ -1,93 +1,135 @@
 import pandas as pd
+import sys
+from typing import Union, Callable
+from pathlib import Path
 
-# Шляхи до файлів
-EURUSD_M1 = r"C:\Users\Oleksii\PycharmProjects\Druid\fundamental_data\EURUSD_M1.csv"
-TECHNICAL_DATA_EURUSD_M1 = r"C:\Users\Oleksii\PycharmProjects\Druid\fundamental_data\technical_data_eurusd_m1.csv"
+# Константи
+EURUSD_M1 = Path(r"C:\Users\Oleksii\PycharmProjects\Druid\fundamental_data\EURUSD_M1.csv")
+TECHNICAL_DATA_EURUSD_M1 = Path(r"C:\Users\Oleksii\PycharmProjects\Druid\fundamental_data\technical_data_eurusd_m1.csv")
+ROWS_TO_SKIP = 30  # Кількість рядків для видалення
 
-# Завантаження вихідного CSV файлу
-df = pd.read_csv(EURUSD_M1)
-
-# Встановлення назв колонок
-#df.columns = ['Date', 'Open', 'High', 'Low', 'Close', 'Volume', 'Other']
-
-# Перетворення стовпця 'Date' у формат datetime
-df['Date'] = pd.to_datetime(df['Date'], format='%Y-%m-%d %H:%M:%S')
-
-# Додавання стовпця 'Local time' у заданому форматі
-df['Local time'] = df['Date'].dt.strftime('%d.%m.%Y %H:%M:%S.000 GMT+0200')
-
-# Формування нового DataFrame з потрібними колонками
-df_new = df[['Local time', 'Open', 'High', 'Low', 'Close', 'Volume']]
-
-# Копіювання лише стовпця 'Close' для подальших обчислень
-data = df[['Close']].copy()
-
-# Додавання ковзної середньої (Moving Average) з вікном 10
-data['MA10'] = df['Close'].rolling(10).mean()
-
-# Додавання MACD (Moving Average Convergence Divergence)
-exp1 = data['Close'].ewm(span=12, adjust=False).mean()  # Швидка EMA
-exp2 = data['Close'].ewm(span=26, adjust=False).mean()  # Повільна EMA
-macd = exp1 - exp2  # Різниця між EMA
-data['MACD'] = macd
-
-# Додавання ROC (Rate of Change) з періодом 2
-n_steps = 2
+# Параметри технічних індикаторів
+BOLLINGER_PERIOD = 20
+RSI_PERIOD = 10
+MACD_FAST = 12
+MACD_SLOW = 26
+ROC_PERIOD = 2
+MOMENTUM_PERIOD = 4
+CCI_PERIOD = 20
 
 
-def my_fun(x):
+def load_data(file_path: Path) -> pd.DataFrame:
+    """Завантаження та початкова обробка даних."""
+    try:
+        df = pd.read_csv(file_path)
+        return df
+    except FileNotFoundError:
+        print(f"Помилка: Файл {file_path} не знайдено")
+        sys.exit(1)
+    except Exception as e:
+        print(f"Помилка при завантаженні даних: {str(e)}")
+        sys.exit(1)
+
+
+def calculate_roc(x: pd.Series) -> float:
+    """Розрахунок Rate of Change."""
     return (x.iloc[-1] - x.iloc[0]) / x.iloc[0]
 
 
-data['ROC'] = data['Close'].rolling(n_steps).apply(my_fun)
-
-# Додавання Momentum з періодом 4
-n_steps = 4
-
-
-def my_fun(x):
-    return (x.iloc[-1] - x.iloc[0])
+def calculate_momentum(x: pd.Series) -> float:
+    """Розрахунок Momentum."""
+    return x.iloc[-1] - x.iloc[0]
 
 
-data['Momentum'] = data['Close'].rolling(n_steps).apply(my_fun)
+def add_indicators(data: pd.DataFrame) -> pd.DataFrame:
+    """Додавання всіх технічних індикаторів."""
+    # Копіювання необхідних стовпців
+    result = data[['Close', 'Open', 'High', 'Low', 'Volume']].copy()
 
-# Додавання RSI (Relative Strength Index)
-delta = data['Close'].diff()  # Зміна ціни
+    # Moving Average
+    result['MA10'] = data['Close'].rolling(10).mean()
 
-# Виділення позитивних і негативних змін
-up, down = delta.copy(), delta.copy()
-up[up < 0] = 0  # Залишаємо лише зростання
-down[down > 0] = 0  # Залишаємо лише спадання
+    # MACD
+    exp1 = data['Close'].ewm(span=MACD_FAST, adjust=False).mean()
+    exp2 = data['Close'].ewm(span=MACD_SLOW, adjust=False).mean()
+    result['MACD'] = exp1 - exp2
 
-# Розрахунок середнього приросту і втрати
-period = 10
-_gain = up.ewm(alpha=1.0 / period, adjust=True).mean()
-_loss = down.abs().ewm(alpha=1.0 / period, adjust=True).mean()
-RS = _gain / _loss
+    # ROC
+    result['ROC'] = data['Close'].rolling(ROC_PERIOD).apply(calculate_roc)
 
-# Обчислення RSI
-data["RSI"] = 100 - (100 / (1 + RS))
+    # Momentum
+    result['Momentum'] = data['Close'].rolling(MOMENTUM_PERIOD).apply(calculate_momentum)
 
-# Додавання верхньої та нижньої меж Bollinger Bands
-typical_price = (df['Close'] + df['Low'] + df['High']) / 3  # Типова ціна
-std = typical_price.rolling(20).std(ddof=0)  # Стандартне відхилення
-ma_tp = typical_price.rolling(20).mean()  # Ковзна середня
-data['BOLU'] = ma_tp + 2 * std  # Верхня межа
-data['BOLD'] = ma_tp - 2 * std  # Нижня межа
+    # RSI
+    delta = data['Close'].diff()
+    gain = (delta.where(delta > 0, 0)).ewm(alpha=1.0 / RSI_PERIOD, adjust=True).mean()
+    loss = (-delta.where(delta < 0, 0)).ewm(alpha=1.0 / RSI_PERIOD, adjust=True).mean()
+    rs = gain / loss
+    result['RSI'] = 100 - (100 / (1 + rs))
 
-# Додавання CCI (Commodity Channel Index)
-tp_rolling = typical_price.rolling(20)
+    # Bollinger Bands
+    typical_price = (data['Close'] + data['Low'] + data['High']) / 3
+    std = typical_price.rolling(BOLLINGER_PERIOD).std(ddof=0)
+    ma_tp = typical_price.rolling(BOLLINGER_PERIOD).mean()
+    result['BOLU'] = ma_tp + 2 * std
+    result['BOLD'] = ma_tp - 2 * std
 
-# Розрахунок середнього відхилення
-mad = tp_rolling.apply(lambda s: abs(s - s.mean()).mean(), raw=True)
+    # CCI
+    tp_rolling = typical_price.rolling(CCI_PERIOD)
+    mad = tp_rolling.apply(lambda s: abs(s - s.mean()).mean(), raw=True)
+    result['CCI'] = (typical_price - tp_rolling.mean()) / (0.015 * mad)
 
-# Обчислення CCI
-data["CCI"] = (typical_price - tp_rolling.mean()) / (0.015 * mad)
+    # Видалення перших N рядків
+    result = result.iloc[ROWS_TO_SKIP:]
 
-# Збереження оброблених даних у новий CSV файл
-data.to_csv(TECHNICAL_DATA_EURUSD_M1)
-print(f"Дані збережено у файл: {TECHNICAL_DATA_EURUSD_M1}")
-print("Перші два рядки:")
-print(data.head(2))
-print("\nОстанні два рядки:")
-print(data.tail(2))
+    return result
+
+
+def validate_data(data: pd.DataFrame) -> None:
+    """Перевірка якості даних."""
+    if data.isna().any().any():
+        print("\nУвага: Виявлено пропущені значення в наступних стовпцях:")
+        print(data.isna().sum()[data.isna().sum() > 0])
+
+    if (data.isin([float('inf'), float('-inf')])).any().any():
+        print("\nУвага: Виявлено нескінченні значення в даних")
+
+
+def save_data(data: pd.DataFrame, file_path: Path) -> None:
+    """Збереження даних у файл."""
+    try:
+        data.to_csv(file_path, index=False)
+        print(f"\nДані успішно збережено у файл: {file_path}")
+    except Exception as e:
+        print(f"Помилка при збереженні даних: {str(e)}")
+        sys.exit(1)
+
+
+def main():
+    # Завантаження даних
+    print("Завантаження даних...", end=' ')
+    df = load_data(EURUSD_M1)
+    print("OK")
+
+    # Розрахунок індикаторів
+    print("Розрахунок технічних індикаторів...", end=' ')
+    technical_data = add_indicators(df)
+    print("OK")
+
+    # Валідація даних
+    print("Перевірка якості даних...", end=' ')
+    validate_data(technical_data)
+    print("OK")
+
+    # Збереження результатів
+    save_data(technical_data, TECHNICAL_DATA_EURUSD_M1)
+
+    # Виведення прикладу даних
+    print("\nПерші два рядки:")
+    print(technical_data.head(2))
+    print("\nОстанні два рядки:")
+    print(technical_data.tail(2))
+
+
+if __name__ == "__main__":
+    main()

@@ -32,8 +32,8 @@ dataset = dataframe.values
 dataset = dataset.astype('float32')  # Перетворення даних у формат float32
 
 # Обрізання перших 20 значень і видалення першого стовпця (заголовки)
-dataset = dataset[30:]  # Видалення перших 20 рядків
-dataset = dataset[:, 1:]  # Видалення першого стовпця
+#dataset = dataset[30:]  # Видалення перших 20 рядків
+#dataset = dataset[:, 1:]  # Видалення першого стовпця
 
 # Нормалізація даних у діапазоні [0, 1]
 scaler = MinMaxScaler(feature_range=(0, 1))
@@ -59,12 +59,13 @@ trainX, trainY = create_dataset(train, look_back)  # Навчальна вибі
 testX, testY = create_dataset(test, look_back)  # Тестова вибірка
 
 # Зміна форми даних для моделі LSTM [зразки, часові кроки, ознаки]
-trainX = np.reshape(trainX, (trainX.shape[0], look_back, 9))
-testX = np.reshape(testX, (testX.shape[0], look_back, 9))
+trainX = np.reshape(trainX, (trainX.shape[0], look_back, 13))
+testX = np.reshape(testX, (testX.shape[0], look_back, 13))
 
 # Створення моделі LSTM
 model = Sequential()
-model.add(LSTM(50, input_shape=(look_back, 9)))  # LSTM шар з 50 нейронами
+model.add(LSTM(100, return_sequences=True, input_shape=(look_back, 13)))  # Перший LSTM шар з return_sequences=True
+model.add(LSTM(50))  # Другий LSTM шар
 model.add(Dense(1))  # Вихідний шар (1 нейрон)
 model.add(Activation('sigmoid'))  # Активаційна функція
 model.compile(loss='mean_squared_error', optimizer='adam')  # Налаштування моделі
@@ -85,7 +86,7 @@ testPredict = np.squeeze(testPredict)
 
 # Функція для зворотного перетворення нормалізованих даних
 def inverse_transform(arr):
-    extended = np.zeros((len(arr), 9))  # Розширення масиву до 9 стовпців
+    extended = np.zeros((len(arr), 13))  # Розширення масиву до 9 стовпців
     extended[:, 0] = arr  # Вставка даних у перший стовпець
     return scaler.inverse_transform(extended)[:, 0]  # Зворотна нормалізація
 
