@@ -7,8 +7,8 @@ from sklearn.metrics import mean_squared_error
 from threshold import get_threshold
 import tensorflow as tf
 
-TECHNICAL_DATA_EURUSD_M1 = r"C:\Users\Oleksii\PycharmProjects\Druid\fundamental_data\technical_data_eurusd_m1.csv"
-SAVE_PROD_MODEL_EURUSD_M1 = r"C:\Users\Oleksii\PycharmProjects\Druid\fundamental_data\prob_model_eurusd_m1.h5"
+TECHNICAL_DATA_EURUSD_H1 = r"C:\Users\Oleksii\PycharmProjects\Druid\fundamental_data\technical_data_eurusd_h1.csv"
+SAVE_PROD_MODEL_EURUSD_H1 = r"C:\Users\Oleksii\PycharmProjects\Druid\fundamental_data\prob_model_eurusd_h1.h5"
 
 
 def predict_future_trend(n_future_steps=10):
@@ -17,28 +17,28 @@ def predict_future_trend(n_future_steps=10):
     """
     # Завантаження та підготовка даних
     try:
-        dataframe = read_csv(TECHNICAL_DATA_EURUSD_M1, engine='python')
+        dataframe = read_csv(TECHNICAL_DATA_EURUSD_H1, engine='python')
         dataset = dataframe.values.astype('float32')
     except Exception as e:
         print(f"Помилка при завантаженні даних: {str(e)}")
         raise
 
     # Видаляємо перші 20 рядків та перший стовпець
-    dataset = dataset[20:]
+    #dataset = dataset[20:]
     original_data = dataset.copy()
-    dataset = dataset[:, 1:]
+    #dataset = dataset[:, 1:]
 
     # Нормалізуємо дані
     scaler = MinMaxScaler(feature_range=(0, 1))
     dataset = scaler.fit_transform(dataset)
 
     # Параметри
-    look_back = 5
+    look_back = 10
     feature_count = dataset.shape[1]
 
     # Завантажуємо модель
     try:
-        model = tf.keras.models.load_model(SAVE_PROD_MODEL_EURUSD_M1)
+        model = tf.keras.models.load_model(SAVE_PROD_MODEL_EURUSD_H1)
     except Exception as e:
         print(f"Помилка при завантаженні моделі: {str(e)}")
         raise
@@ -145,7 +145,7 @@ if __name__ == "__main__":
         future_predictions = predict_future_trend(n_future)
 
         # Отримуємо порогове значення
-        dataframe = read_csv(TECHNICAL_DATA_EURUSD_M1, engine='python')
+        dataframe = read_csv(TECHNICAL_DATA_EURUSD_H1, engine='python')
         threshold = get_threshold(dataframe["Close"])
 
         # Аналізуємо тренди

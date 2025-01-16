@@ -7,17 +7,14 @@ from sklearn.metrics import mean_squared_error
 from threshold import get_threshold
 import tensorflow as tf
 
-TECHNICAL_DATA_EURUSD_M1 = r"C:\Users\Oleksii\PycharmProjects\Druid\fundamental_data\technical_data_eurusd_m1.csv"
-SAVE_PROD_MODEL_EURUSD_M1 = r"C:\Users\Oleksii\PycharmProjects\Druid\fundamental_data\prob_model_eurusd_m1.h5"
+TECHNICAL_DATA_EURUSD_H1 = r"C:\Users\Oleksii\PycharmProjects\Druid\fundamental_data\technical_data_eurusd_h1.csv"
+SAVE_PROD_MODEL_EURUSD_H1 = r"C:\Users\Oleksii\PycharmProjects\Druid\fundamental_data\prob_model_eurusd_h1.h5"
 
 
 # Завантаження даних
-dataframe = read_csv(TECHNICAL_DATA_EURUSD_M1, engine='python')
+dataframe = read_csv(TECHNICAL_DATA_EURUSD_H1, engine='python')
 dataset = dataframe.values.astype('float32')
 
-# Відкидаємо перші 20 рядків
-dataset = dataset[20:]
-dataset = dataset[:, 1:]
 
 # Нормалізація даних
 scaler = MinMaxScaler(feature_range=(0, 1))
@@ -37,7 +34,7 @@ def create_dataset(dataset, look_back=1):
     return np.array(dataX), np.array(dataY)
 
 # Визначення параметра look_back
-look_back = 5
+look_back = 10
 trainX, trainY = create_dataset(train, look_back)
 testX, testY = create_dataset(test, look_back)
 
@@ -46,7 +43,7 @@ trainX = np.reshape(trainX, (trainX.shape[0], look_back, trainX.shape[2]))
 testX = np.reshape(testX, (testX.shape[0], look_back, testX.shape[2]))
 
 # Завантаження моделі
-model = tf.keras.models.load_model(SAVE_PROD_MODEL_EURUSD_M1)
+model = tf.keras.models.load_model(SAVE_PROD_MODEL_EURUSD_H1)
 
 # Прогнозування
 trainPredict = np.squeeze(model.predict(trainX))
