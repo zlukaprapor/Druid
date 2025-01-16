@@ -65,8 +65,8 @@ testX = np.reshape(testX, (testX.shape[0], look_back, 13))
 
 # Створення моделі LSTM
 model = Sequential()
-model.add(LSTM(100, return_sequences=True, input_shape=(look_back, 13)))  # Перший LSTM шар з return_sequences=True
-model.add(LSTM(50))  # Другий LSTM шар
+model.add(LSTM(100, return_sequences=True, input_shape=(look_back, 13)))  # Перший LSTM шар 100
+model.add(LSTM(50))  # Другий LSTM шар 50
 model.add(Dense(1))  # Вихідний шар (1 нейрон)
 model.add(Activation('sigmoid'))  # Активаційна функція
 model.compile(loss='mean_squared_error', optimizer='adam')  # Налаштування моделі
