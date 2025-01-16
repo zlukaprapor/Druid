@@ -4,8 +4,8 @@ from typing import Union, Callable
 from pathlib import Path
 
 # Константи
-EURUSD_M1 = Path(r"C:\Users\Oleksii\PycharmProjects\Druid\fundamental_data\EURUSD_M1.csv")
-TECHNICAL_DATA_EURUSD_M1 = Path(r"C:\Users\Oleksii\PycharmProjects\Druid\fundamental_data\technical_data_eurusd_m1.csv")
+EURUSD_H1 = Path(r"C:\Users\Oleksii\PycharmProjects\Druid\fundamental_data\EURUSD_H1.csv")
+TECHNICAL_DATA_EURUSD_H1 = Path(r"C:\Users\Oleksii\PycharmProjects\Druid\fundamental_data\technical_data_eurusd_h1.csv")
 ROWS_TO_SKIP = 30  # Кількість рядків для видалення
 
 # Параметри технічних індикаторів
@@ -108,7 +108,7 @@ def save_data(data: pd.DataFrame, file_path: Path) -> None:
 def main():
     # Завантаження даних
     print("Завантаження даних...", end=' ')
-    df = load_data(EURUSD_M1)
+    df = load_data(EURUSD_H1)
     print("OK")
 
     # Розрахунок індикаторів
@@ -122,7 +122,7 @@ def main():
     print("OK")
 
     # Збереження результатів
-    save_data(technical_data, TECHNICAL_DATA_EURUSD_M1)
+    save_data(technical_data, TECHNICAL_DATA_EURUSD_H1)
 
     # Виведення прикладу даних
     print("\nПерші два рядки:")

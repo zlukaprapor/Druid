@@ -7,10 +7,11 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error
 from sklearn.preprocessing import MinMaxScaler
 from tensorflow.python.keras.layers import Activation, Dense, LSTM
 from tensorflow.python.keras.models import Sequential
+from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 
 # Шляхи до файлів з даними та для збереження моделі
-TECHNICAL_DATA_EURUSD_M1 = r"C:\Users\Oleksii\PycharmProjects\Druid\fundamental_data\technical_data_eurusd_m1.csv"
-SAVE_PROD_MODEL_EURUSD_M1 = r"C:\Users\Oleksii\PycharmProjects\Druid\fundamental_data\prob_model_eurusd_m1.h5"
+TECHNICAL_DATA_EURUSD_H1 = r"C:\Users\Oleksii\PycharmProjects\Druid\fundamental_data\technical_data_eurusd_h1.csv"
+SAVE_PROD_MODEL_EURUSD_H1 = r"C:\Users\Oleksii\PycharmProjects\Druid\fundamental_data\prob_model_eurusd_h1.h5"
 FILE_LOG = r"C:\Users\Oleksii\PycharmProjects\Druid\log\model_eurusd_m1.log"
 
 # Налаштування логування
@@ -27,7 +28,7 @@ start_time = time.time()
 logging.info("Модель почала навчатися")
 
 # Завантаження даних з CSV-файлу
-dataframe = read_csv(TECHNICAL_DATA_EURUSD_M1, engine='python')
+dataframe = read_csv(TECHNICAL_DATA_EURUSD_H1, engine='python')
 dataset = dataframe.values
 dataset = dataset.astype('float32')  # Перетворення даних у формат float32
 
@@ -54,7 +55,7 @@ def create_dataset(dataset, look_back=1):
     return np.array(dataX), np.array(dataY)
 
 # Кількість попередніх кроків для прогнозу
-look_back = 5
+look_back = 10
 trainX, trainY = create_dataset(train, look_back)  # Навчальна вибірка
 testX, testY = create_dataset(test, look_back)  # Тестова вибірка
 
@@ -70,11 +71,17 @@ model.add(Dense(1))  # Вихідний шар (1 нейрон)
 model.add(Activation('sigmoid'))  # Активаційна функція
 model.compile(loss='mean_squared_error', optimizer='adam')  # Налаштування моделі
 
-# Навчання моделі
-model.fit(trainX, trainY, epochs=30, batch_size=256, verbose=1)
+# Колбеки для ранньої зупинки та збереження моделі
+early_stopping = EarlyStopping(monitor='val_loss', patience=5, restore_best_weights=True, verbose=1)
+model_checkpoint = ModelCheckpoint(SAVE_PROD_MODEL_EURUSD_H1, monitor='val_loss', save_best_only=True, verbose=1)
+
+# Навчання моделі з колбеками
+model.fit(trainX, trainY, epochs=100, batch_size=128, verbose=1,
+          validation_data=(testX, testY),
+          callbacks=[early_stopping, model_checkpoint])
 
 # Збереження навченої моделі
-model.save(SAVE_PROD_MODEL_EURUSD_M1)
+#model.save(SAVE_PROD_MODEL_EURUSD_M1)
 
 # Передбачення на навчальній і тестовій вибірках
 trainPredict = model.predict(trainX)
@@ -96,33 +103,45 @@ testPredict = inverse_transform(testPredict)
 trainY = inverse_transform(trainY)
 testY = inverse_transform(testY)
 
-# Обрізання тестових даних для відповідності прогнозам
-testPredict = np.delete(testPredict, -1)  # Видалення останнього значення з передбачень
-testY = np.delete(testY, 0)  # Видалення першого значення з реальних даних
+# # Обрізання тестових даних для відповідності прогнозам
+# testPredict = np.delete(testPredict, -1)  # Видалення останнього значення з передбачень
+# testY = np.delete(testY, 0)  # Видалення першого значення з реальних даних
 
-# Побудова графіків для порівняння передбачень і реальних значень
-plt.plot(testPredict, color="blue", label="Predictions")
-plt.plot(testY, color="red", label="Actual")
-plt.legend()
-plt.show()
+# Функція для обчислення MAPE
+def mean_absolute_percentage_error(y_true, y_pred):
+    return np.mean(np.abs((y_true - y_pred) / y_true)) * 100
 
-# Обчислення метрик RMSE та MAE
-testScore = np.sqrt(mean_squared_error(testY, testPredict))
-scaled_rmse = np.sqrt(mean_squared_error(testY, testPredict))
-original_rmse = np.sqrt(mean_squared_error(inverse_transform(testY), inverse_transform(testPredict)))
-scaled_mae = mean_absolute_error(testY, testPredict)
-original_mae = mean_absolute_error(inverse_transform(testY), inverse_transform(testPredict))
+# Обчислення метрик
+rmse = np.sqrt(mean_squared_error(testY, testPredict))
+mae = mean_absolute_error(testY, testPredict)
+mape = mean_absolute_percentage_error(testY, testPredict)
 
-# Виведення метрик
-print(f'Test Score: {testScore:.6f} RMSE')
-print("Scaled RMSE:", scaled_rmse)
-print("Original RMSE:", original_rmse)
-print("Scaled MAE:", scaled_mae)
-print("Original MAE:", original_mae)
+logging.info(f"RMSE: {rmse:.6f}")
+logging.info(f"MAE: {mae:.6f}")
+logging.info(f"MAPE: {mape:.6f}%")
 
 # Виведення останніх 5 передбачень і реальних значень
-print("Test Predictions (Last 5):", testPredict[-5:])
-print("Actual Values (Last 5):", testY[-5:])
+logging.info(f"Test Predictions (Last 5): {testPredict[-5:]}")
+logging.info(f"Actual Values (Last 5): {testY[-5:]}")
+
+# Побудова графіків
+plt.figure(figsize=(14, 7))
+
+# Навчальні передбачення
+plt.plot(trainPredict, color="green", label="Train Predictions")
+
+# Тестові передбачення
+plt.plot(range(len(trainPredict), len(trainPredict) + len(testPredict)), testPredict, color="blue", label="Test Predictions")
+
+# Фактичні значення
+plt.plot(range(len(trainPredict)), trainY, color="orange", label="Train Actual")
+plt.plot(range(len(trainPredict), len(trainPredict) + len(testY)), testY, color="red", label="Test Actual")
+
+plt.legend()
+plt.title("Передбачення vs Реальні значення")
+plt.xlabel("Час")
+plt.ylabel("Ціна")
+plt.show()
 
 # Кінець вимірювання часу
 end_time = time.time()
