@@ -29,12 +29,9 @@ logging.info("Модель почала навчатися")
 
 # Завантаження даних з CSV-файлу
 dataframe = read_csv(TECHNICAL_DATA_EURUSD_H1, engine='python')
-dataset = dataframe.values
-dataset = dataset.astype('float32')  # Перетворення даних у формат float32
+#dataset = dataframe.values
+dataset = dataframe.values.astype('float32')  # Перетворення даних у формат float32
 
-# Обрізання перших 20 значень і видалення першого стовпця (заголовки)
-#dataset = dataset[30:]  # Видалення перших 20 рядків
-#dataset = dataset[:, 1:]  # Видалення першого стовпця
 
 # Нормалізація даних у діапазоні [0, 1]
 scaler = MinMaxScaler(feature_range=(0, 1))
@@ -46,7 +43,7 @@ test_size = len(dataset) - train_size
 train, test = dataset[0:train_size, :], dataset[train_size:len(dataset), :]
 
 # Функція для створення вибірки з використанням затримки (look_back)
-def create_dataset(dataset, look_back=1):
+def create_dataset(dataset, look_back=10):
     dataX, dataY = [], []
     for i in range(len(dataset) - look_back - 1):
         a = dataset[i:(i + look_back), :]  # Вибірка з look_back значень
@@ -102,10 +99,6 @@ trainPredict = inverse_transform(trainPredict)
 testPredict = inverse_transform(testPredict)
 trainY = inverse_transform(trainY)
 testY = inverse_transform(testY)
-
-# # Обрізання тестових даних для відповідності прогнозам
-# testPredict = np.delete(testPredict, -1)  # Видалення останнього значення з передбачень
-# testY = np.delete(testY, 0)  # Видалення першого значення з реальних даних
 
 # Функція для обчислення MAPE
 def mean_absolute_percentage_error(y_true, y_pred):
