@@ -51,7 +51,7 @@ if __name__ == "__main__":
     TIMEFRAME = mt5.TIMEFRAME_H1  # Таймфрейм: M1
 
     # Кінцева дата — поточна дата
-    END_DATE = datetime.now()
+    END_DATE = datetime.now().replace(minute=0, second=0, microsecond=0)+ timedelta(hours=2)
     # Початкова дата — 69 днів до кінцевої
     START_DATE = END_DATE - timedelta(days=4166) #M1-69 #H1-4166
 
