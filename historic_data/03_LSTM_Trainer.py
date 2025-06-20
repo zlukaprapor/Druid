@@ -43,7 +43,7 @@ logging.basicConfig(
 
 
 class IncrementalLSTMTrainer:
-    def __init__(self, look_back=10, new_data_threshold=6):
+    def __init__(self, look_back=10, new_data_threshold=12):
         self.look_back = look_back
         self.new_data_threshold = new_data_threshold
         self.price_scaler = None
@@ -279,51 +279,16 @@ def main():
     logging.info(f"Розмір завантажених даних: {dataframe.shape}")
     logging.info(f"Колонки: {list(dataframe.columns)}")
 
-    # Перевірка чи потрібно інкрементальне навчання
+    # Завантаження логів і стану
     training_log = trainer.load_training_log()
     model_exists = os.path.exists(SAVE_PROD_MODEL_EURUSD_H1)
     scalers_loaded = trainer.load_scalers()
 
-    # Визначення типу навчання
-    if (model_exists and scalers_loaded and training_log and
-            current_data_size - trainer.last_data_size >= trainer.new_data_threshold):
+    # Розрахунок кількості нових даних
+    new_data_count = current_data_size - trainer.last_data_size
+    threshold = trainer.new_data_threshold  # Зазвичай 12
 
-        logging.info(
-            f"Виявлено {current_data_size - trainer.last_data_size} нових записів. Починаємо інкрементальне навчання")
-
-        # Завантаження існуючої моделі
-        trainer.model = load_model(SAVE_PROD_MODEL_EURUSD_H1)
-        logging.info("Модель завантажено")
-
-        # Підготовка даних для інкрементального навчання
-        dataset_scaled = trainer.prepare_data(dataframe, is_incremental=True)
-
-        # Беремо тільки нові дані для донавчання
-        new_data = dataset_scaled[-trainer.new_data_threshold - trainer.look_back - 1:]
-        new_X, new_Y = trainer.create_dataset(new_data)
-        new_X = np.reshape(new_X, (new_X.shape[0], trainer.look_back, trainer.n_features))
-
-        # Інкрементальне навчання
-        history = trainer.train_incremental(new_X, new_Y, epochs=3)
-
-        # Збереження оновленої моделі
-        trainer.model.save(SAVE_PROD_MODEL_EURUSD_H1)
-
-        # Тестування на останніх даних
-        test_data = dataset_scaled[-50:]
-        testX, testY = trainer.create_dataset(test_data)
-        testX = np.reshape(testX, (testX.shape[0], trainer.look_back, trainer.n_features))
-
-        testPredict = trainer.model.predict(testX)
-        testPredict = trainer.inverse_price_transform(testPredict)
-        testY = trainer.inverse_price_transform(testY.reshape(-1, 1))
-
-        # Розрахунок метрик
-        metrics = trainer.calculate_metrics(testY, testPredict)
-
-        logging.info("Інкрементальне навчання завершено")
-
-    else:
+    if not model_exists or not scalers_loaded or not training_log:
         logging.info("Початок повного навчання моделі")
 
         # Підготовка даних
@@ -362,9 +327,51 @@ def main():
         except Exception as e:
             logging.warning(f"Помилка при створенні графіку: {e}")
 
+    elif new_data_count >= threshold:
+        logging.info(f"Виявлено {new_data_count} нових записів. Починаємо інкрементальне навчання")
+
+        # Завантаження існуючої моделі
+        trainer.model = load_model(SAVE_PROD_MODEL_EURUSD_H1)
+        logging.info("Модель завантажено")
+
+        # Підготовка даних для інкрементального навчання
+        dataset_scaled = trainer.prepare_data(dataframe, is_incremental=True)
+
+        # Беремо тільки нові дані для донавчання
+        new_data = dataset_scaled[-threshold - trainer.look_back - 1:]
+        new_X, new_Y = trainer.create_dataset(new_data)
+        new_X = np.reshape(new_X, (new_X.shape[0], trainer.look_back, trainer.n_features))
+
+        # Інкрементальне навчання
+        history = trainer.train_incremental(new_X, new_Y, epochs=3)
+
+        # Збереження оновленої моделі
+        trainer.model.save(SAVE_PROD_MODEL_EURUSD_H1)
+
+        # Тестування на останніх даних
+        test_data = dataset_scaled[-50:]
+        testX, testY = trainer.create_dataset(test_data)
+        testX = np.reshape(testX, (testX.shape[0], trainer.look_back, trainer.n_features))
+
+        testPredict = trainer.model.predict(testX)
+        testPredict = trainer.inverse_price_transform(testPredict)
+        testY = trainer.inverse_price_transform(testY.reshape(-1, 1))
+
+        # Розрахунок метрик
+        metrics = trainer.calculate_metrics(testY, testPredict)
+
+        logging.info("Інкрементальне навчання завершено")
+
+    else:
+        logging.info(f"Недостатньо нових даних ({new_data_count} < {threshold}). Навчання пропущено.")
+        metrics = {"RMSE": np.nan, "MAE": np.nan, "MAPE": np.nan}
+
     # Виведення метрик
     for name, value in metrics.items():
-        logging.info(f"{name}: {value:.6f}" + ("%" if name == 'MAPE' else ""))
+        if not np.isnan(value):
+            logging.info(f"{name}: {value:.6f}" + ("%" if name == 'MAPE' else ""))
+        else:
+            logging.info(f"{name}: ---")
 
     # Збереження логу тренування
     trainer.save_training_log(current_data_size, metrics)
