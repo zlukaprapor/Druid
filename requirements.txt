@@ -58,3 +58,4 @@ zipp==3.11.0
 torch~=2.5.1
 yfinance~=0.2.51
 MetaTrader5~=5.0.4738
+xgboost~=2.1.4

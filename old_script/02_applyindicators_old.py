@@ -3,8 +3,8 @@ import sys
 from pathlib import Path
 
 # Константи
-EURUSD_H1 = Path(r"C:\Users\Oleksii\PycharmProjects\Druid\historic_data\csv\EURUSDH1.csv")
-TECHNICAL_DATA_EURUSD_H1 = Path(r"C:\Users\Oleksii\PycharmProjects\Druid\historic_data\csv\historic_data_eurusd_h1.csv")
+EURUSD_H1 = Path(r"/historic_data/csv/EURUSDH1.csv")
+TECHNICAL_DATA_EURUSD_H1 = Path(r"/historic_data/csv/historic_data_eurusd_h1.csv")
 ROWS_TO_SKIP = 30  # Кількість рядків для видалення
 
 # Параметри технічних індикаторів

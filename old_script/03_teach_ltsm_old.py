@@ -8,13 +8,12 @@ from sklearn.preprocessing import MinMaxScaler
 from tensorflow.python.keras.layers import Dense, LSTM
 from tensorflow.python.keras.models import Sequential
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
-import tensorflow as tf
-tf.config.optimizer.set_jit(True)  # Увімкнути JIT-компіляцію для прискорення на GPU
+
 
 # Шляхи до файлів
 TECHNICAL_DATA_EURUSD_H1 = r"C:\Users\Oleksii\PycharmProjects\Druid\historic_data\csv\historic_data_eurusd_h1.csv"
 SAVE_PROD_MODEL_EURUSD_H1 = r"C:\Users\Oleksii\PycharmProjects\Druid\historic_data\train_model\historic_model_eurusd_h1.h5"
-FILE_LOG = r"C:\Users\Oleksii\PycharmProjects\Druid\log\historic_teach_ltsm_eurusd_m1.log"
+FILE_LOG = r"/log/historic_teach_ltsm_eurusd_m1.log"
 
 # Налаштування логування
 logging.basicConfig(
@@ -68,17 +67,10 @@ trainX = np.reshape(trainX, (trainX.shape[0], look_back, 13))
 testX = np.reshape(testX, (testX.shape[0], look_back, 13))
 
 # Покращена архітектура моделі
-# model = Sequential([
-#     LSTM(100, return_sequences=True, input_shape=(look_back, 13), dropout=0.2),
-#     LSTM(50, dropout=0.2),
-#     Dense(1, activation='linear')  # Лінійна активація для регресії
-# ])
 model = Sequential([
-    LSTM(50, return_sequences=True, input_shape=(look_back, 13)),
-    LSTM(50, return_sequences=True),
-    LSTM(50),
-    Dense(25, activation='relu'),
-    Dense(1, activation='linear')  # Прогноз регресії
+    LSTM(100, return_sequences=True, input_shape=(look_back, 13), dropout=0.2),
+    LSTM(50, dropout=0.2),
+    Dense(1, activation='linear')  # Лінійна активація для регресії
 ])
 
 model.compile(loss='mean_squared_error', optimizer='adam')
