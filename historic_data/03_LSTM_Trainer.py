@@ -29,7 +29,7 @@ TECHNICAL_DATA_EURUSD_H1 = r"C:\Users\Oleksii\PycharmProjects\Druid\historic_dat
 SAVE_PROD_MODEL_EURUSD_H1 = r"C:\Users\Oleksii\PycharmProjects\Druid\historic_data\train_model\historic_model_eurusd_h1.h5"
 SCALER_PATH = r"C:\Users\Oleksii\PycharmProjects\Druid\historic_data\train_model\scalers.pkl"
 TRAINING_LOG_PATH = r"C:\Users\Oleksii\PycharmProjects\Druid\historic_data\train_model\training_log.pkl"
-FILE_LOG = r"C:\Users\Oleksii\PycharmProjects\Druid\log\historic_teach_ltsm_eurusd_m1.log"
+FILE_LOG = r"C:\Users\Oleksii\PycharmProjects\Druid\log\03_LTSM_Trainer_log.log"
 
 # Налаштування логування
 logging.basicConfig(
@@ -43,7 +43,7 @@ logging.basicConfig(
 
 
 class IncrementalLSTMTrainer:
-    def __init__(self, look_back=10, new_data_threshold=12):
+    def __init__(self, look_back=10, new_data_threshold=6):
         self.look_back = look_back
         self.new_data_threshold = new_data_threshold
         self.price_scaler = None

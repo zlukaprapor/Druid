@@ -1,7 +1,19 @@
 import MetaTrader5 as mt5
 import pandas as pd
+import logging
 from datetime import datetime, timedelta
 
+FILE_LOG = r"C:\Users\Oleksii\PycharmProjects\Druid\log\01_GET_EURUSD_H1_Meta5_log.log"
+
+# Налаштування логування
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s: %(message)s',
+    handlers=[
+        logging.FileHandler(FILE_LOG, encoding='utf-8'),
+        logging.StreamHandler()
+    ]
+)
 
 def get_mt5_data(symbol, timeframe, start_date, end_date):
     """
@@ -51,7 +63,7 @@ if __name__ == "__main__":
     TIMEFRAME = mt5.TIMEFRAME_H1  # Таймфрейм: M1
 
     # Кінцева дата — поточна дата
-    END_DATE = datetime.now().replace(minute=0, second=0, microsecond=0)+ timedelta(hours=3)
+    END_DATE = datetime.now().replace(minute=0, second=0, microsecond=0)+ timedelta(hours=2)
     # Початкова дата — 69 днів до кінцевої
     START_DATE = END_DATE - timedelta(days=4166) #M1-69 #H1-4166
 
@@ -60,13 +72,13 @@ if __name__ == "__main__":
     if data is not None:
         # Збереження у CSV
         data.to_csv(EURUSDH1, index=False)
-        print(f"Дані збережено у файл: {EURUSDH1}")
-        print("Перші два рядки:")
-        print(data.head(2))
-        print("\nОстанні два рядки:")
-        print(data.tail(2))
+        logging.info(f"Дані збережено у файл: {EURUSDH1}")
+        logging.info("Перші два рядки:")
+        logging.info(data.head(2))
+        logging.info("Останні два рядки:")
+        logging.info(data.tail(2))
     else:
-        print("Не вдалося отримати дані.")
+        logging.info("Не вдалося отримати дані.")
 
     # Завершення роботи MetaTrader 5
     mt5.shutdown()

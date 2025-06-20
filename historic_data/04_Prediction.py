@@ -14,7 +14,7 @@ os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 TECHNICAL_DATA_EURUSD_H1 = r"C:\Users\Oleksii\PycharmProjects\Druid\historic_data\csv\historic_data_eurusd_h1.csv"
 SAVE_PROD_MODEL_EURUSD_H1 = r"C:\Users\Oleksii\PycharmProjects\Druid\historic_data\train_model\historic_model_eurusd_h1.h5"
 SCALER_PATH = r"C:\Users\Oleksii\PycharmProjects\Druid\historic_data\train_model\scalers.pkl"
-FILE_LOG = r"C:\Users\Oleksii\PycharmProjects\Druid\log\historic_teach_ltsm_eurusd_m1.log"
+FILE_LOG = r"C:\Users\Oleksii\PycharmProjects\Druid\log\04_Prediction_log.log"
 
 # Налаштування логування
 logging.basicConfig(

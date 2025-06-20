@@ -4,6 +4,7 @@ import sys
 from pathlib import Path
 from datetime import datetime
 import warnings
+import logging
 
 warnings.filterwarnings('ignore')
 
@@ -11,6 +12,17 @@ warnings.filterwarnings('ignore')
 EURUSD_H1 = Path(r"C:\Users\Oleksii\PycharmProjects\Druid\historic_data\csv\EURUSDH1.csv")
 TECHNICAL_DATA_EURUSD_H1 = Path(r"C:\Users\Oleksii\PycharmProjects\Druid\historic_data\csv\historic_data_eurusd_h1.csv")
 ROWS_TO_SKIP = 50  # Збільшено для більш стабільних індикаторів
+FILE_LOG = r"C:\Users\Oleksii\PycharmProjects\Druid\log\02_Apply_Indicator_log.log"
+
+# Налаштування логування
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s: %(message)s',
+    handlers=[
+        logging.FileHandler(FILE_LOG, encoding='utf-8'),
+        logging.StreamHandler()
+    ]
+)
 
 # Параметри технічних індикаторів
 BOLLINGER_PERIOD = 20
@@ -257,7 +269,7 @@ def add_rolling_statistics(data: pd.DataFrame, windows=[5, 10, 20]) -> pd.DataFr
 
 def validate_and_clean_data(data: pd.DataFrame) -> pd.DataFrame:
     """Валідація та очищення даних."""
-    print(f"Розмір даних до очищення: {data.shape}")
+    logging.info(f"Розмір даних до очищення: {data.shape}")
 
     # Заміна нескінченних значень на NaN
     data = data.replace([np.inf, -np.inf], np.nan)
@@ -270,7 +282,7 @@ def validate_and_clean_data(data: pd.DataFrame) -> pd.DataFrame:
             cols_to_drop.append(col)
 
     if cols_to_drop:
-        print(f"Видалено стовпці з великою кількістю NaN: {cols_to_drop}")
+        logging.info(f"Видалено стовпці з великою кількістю NaN: {cols_to_drop}")
         data = data.drop(columns=cols_to_drop)
 
     # Заповнення пропущених значень
@@ -283,7 +295,7 @@ def validate_and_clean_data(data: pd.DataFrame) -> pd.DataFrame:
     # Видалення рядків, які все ще мають NaN
     data = data.dropna()
 
-    print(f"Розмір даних після очищення: {data.shape}")
+    logging.info(f"Розмір даних після очищення: {data.shape}")
 
     # Перевірка на викиди (Z-score)
     numeric_columns = data.select_dtypes(include=[np.number]).columns
@@ -291,7 +303,7 @@ def validate_and_clean_data(data: pd.DataFrame) -> pd.DataFrame:
     outliers = (z_scores > 5).any(axis=1)
 
     if outliers.sum() > 0:
-        print(f"Виявлено {outliers.sum()} викидів")
+        logging.info(f"Виявлено {outliers.sum()} викидів")
         # Можна видалити або обрізати викиди
         # data = data[~outliers]  # Розкоментувати для видалення викидів
 
@@ -333,9 +345,9 @@ def save_processed_data(data: pd.DataFrame, file_path: Path) -> None:
         final_data = data[columns_to_save]
 
         final_data.to_csv(file_path, index=False)
-        print(f"\nДані успішно збережено у файл: {file_path}")
-        print(f"Кількість ознак: {len(columns_to_save)}")
-        print(f"Кількість записів: {len(final_data)}")
+        logging.info(f"Дані успішно збережено у файл: {file_path}")
+        logging.info(f"Кількість ознак: {len(columns_to_save)}")
+        logging.info(f"Кількість записів: {len(final_data)}")
 
     except Exception as e:
         print(f"Помилка при збереженні даних: {str(e)}")
@@ -343,73 +355,73 @@ def save_processed_data(data: pd.DataFrame, file_path: Path) -> None:
 
 
 def main():
-    print("=" * 60)
-    print("РОЗШИРЕНА ПІДГОТОВКА ДАНИХ ДЛЯ ФОРЕКС ПРОГНОЗУВАННЯ")
-    print("=" * 60)
+    logging.info("=" * 60)
+    logging.info("ПІДГОТОВКА ДАНИХ ДЛЯ ПРОГНОЗУВАННЯ")
+    logging.info("=" * 60)
 
     # Завантаження сирих даних
-    print("\n1. Завантаження даних...", end=' ')
+    logging.info("1. Завантаження даних...")
     df = load_data(EURUSD_H1)
-    print(f"OK ({len(df)} записів)")
+    logging.info(f"OK ({len(df)} записів)")
 
     # Додавання часових ознак
-    print("2. Додавання часових ознак...", end=' ')
+    logging.info("2. Додавання часових ознак...")
     df = add_time_features(df)
-    print("OK")
+    logging.info("OK")
 
     # Розрахунок технічних індикаторів
-    print("3. Розрахунок технічних індикаторів...", end=' ')
+    logging.info("3. Розрахунок технічних індикаторів...")
     df = calculate_advanced_indicators(df)
-    print("OK")
+    logging.info("OK")
 
     # Додавання лагових ознак
-    print("4. Додавання лагових ознак...", end=' ')
+    logging.info("4. Додавання лагових ознак...")
     df = add_lagged_features(df)
-    print("OK")
+    logging.info("OK")
 
     # Ковзні статистики
-    print("5. Розрахунок ковзних статистик...", end=' ')
+    logging.info("5. Розрахунок ковзних статистик...")
     df = add_rolling_statistics(df)
-    print("OK")
+    logging.info("OK")
 
     # Створення цільових змінних
-    print("6. Створення цільових змінних...", end=' ')
+    logging.info("6. Створення цільових змінних...")
     df = create_target_variables(df)
-    print("OK")
+    logging.info("OK")
 
     # Валідація та очищення
-    print("7. Валідація та очищення даних...")
+    logging.info("7. Валідація та очищення даних...")
     df = validate_and_clean_data(df)
 
     # Видалення перших рядків з нестабільними індикаторами
-    print(f"8. Видалення перших {ROWS_TO_SKIP} рядків...", end=' ')
+    logging.info(f"8. Видалення перших {ROWS_TO_SKIP} рядків...")
     df = df.iloc[ROWS_TO_SKIP:].reset_index(drop=True)
-    print("OK")
+    logging.info("OK")
 
     # Збереження результатів
-    print("9. Збереження результатів...")
+    logging.info("9. Збереження результатів...")
     save_processed_data(df, TECHNICAL_DATA_EURUSD_H1)
 
     # Статистика
-    print("\n" + "=" * 60)
-    print("СТАТИСТИКА ПІДГОТОВЛЕНИХ ДАНИХ:")
-    print("=" * 60)
-    print(f"Загальна кількість ознак: {len([col for col in df.columns if col not in ['Date']])}")
-    print(f"Записів після обробки: {len(df)}")
-    print(f"Період даних: {df['Date'].min()} - {df['Date'].max()}")
+    logging.info("=" * 60)
+    logging.info("СТАТИСТИКА ПІДГОТОВЛЕНИХ ДАНИХ:")
+    logging.info("=" * 60)
+    logging.info(f"Загальна кількість ознак: {len([col for col in df.columns if col not in ['Date']])}")
+    logging.info(f"Записів після обробки: {len(df)}")
+    logging.info(f"Період даних: {df['Date'].min()} - {df['Date'].max()}")
 
     # Приклад даних
-    print("\nПерші 3 рядки технічних ознак:")
+    logging.info("Перші 3 рядки технічних ознак:")
     feature_cols = [col for col in df.columns if
                     col not in ['Date'] and not col.startswith('Target') and not col.startswith('Direction')][:10]
-    print(df[feature_cols].head(3).round(6))
+    logging.info(df[feature_cols].head(3).round(6))
 
-    print("\nОстанні 3 рядки:")
-    print(df[feature_cols].tail(3).round(6))
+    logging.info("Останні 3 рядки:")
+    logging.info(df[feature_cols].tail(3).round(6))
 
-    print("\n" + "=" * 60)
-    print("ПІДГОТОВКА ДАНИХ ЗАВЕРШЕНА УСПІШНО!")
-    print("=" * 60)
+    logging.info("=" * 60)
+    logging.info("ПІДГОТОВКА ДАНИХ ЗАВЕРШЕНА УСПІШНО!")
+    logging.info("=" * 60)
 
 
 if __name__ == "__main__":

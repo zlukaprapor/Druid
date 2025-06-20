@@ -1,0 +1,41 @@
+2025-06-20 22:34:57,106 - INFO: Завантаження даних
+2025-06-20 22:35:02,356 - INFO: Розмір завантажених даних: (70782, 94)
+2025-06-20 22:35:02,356 - INFO: Колонки: ['Close', 'Open', 'High', 'Low', 'Volume', 'ForexSession', 'Hour_sin', 'Hour_cos', 'DayOfWeek_sin', 'DayOfWeek_cos', 'Month_sin', 'Month_cos', 'SMA_5', 'SMA_10', 'SMA_20', 'SMA_50', 'EMA_12', 'EMA_26', 'MACD', 'MACD_Signal', 'MACD_Histogram', 'BB_Upper', 'BB_Lower', 'BB_Width', 'BB_Position', 'ATR', 'Volatility', 'RSI', 'Stoch_K', 'Stoch_D', 'CCI', 'Williams_R', 'ROC', 'Momentum', 'PROC', 'Volume_ROC', 'Volume_MA', 'Volume_Ratio', 'Returns_1', 'Returns_5', 'Returns_10', 'HL_Spread', 'OC_Spread', 'Price_Position', 'Gap', 'Support', 'Resistance', 'Support_Distance', 'Resistance_Distance', 'Close_lag_1', 'Returns_lag_1', 'Volume_lag_1', 'Close_lag_2', 'Returns_lag_2', 'Volume_lag_2', 'Close_lag_3', 'Returns_lag_3', 'Volume_lag_3', 'Close_lag_5', 'Returns_lag_5', 'Volume_lag_5', 'Close_lag_10', 'Returns_lag_10', 'Volume_lag_10', 'Returns_mean_5', 'Returns_std_5', 'Returns_skew_5', 'Returns_kurt_5', 'Volume_mean_5', 'Volume_std_5', 'High_max_5', 'Low_min_5', 'Returns_mean_10', 'Returns_std_10', 'Returns_skew_10', 'Returns_kurt_10', 'Volume_mean_10', 'Volume_std_10', 'High_max_10', 'Low_min_10', 'Returns_mean_20', 'Returns_std_20', 'Returns_skew_20', 'Returns_kurt_20', 'Volume_mean_20', 'Volume_std_20', 'High_max_20', 'Low_min_20', 'Target_1h', 'Target_4h', 'Target_24h', 'Direction_1h', 'Direction_4h', 'High_Volatility']
+2025-06-20 22:35:02,359 - INFO: Початок повного навчання моделі
+2025-06-20 22:35:02,446 - INFO: Розмір даних: (70782, 89)
+2025-06-20 22:35:02,446 - INFO: Кількість ознак: 89
+2025-06-20 22:35:02,470 - INFO: Скейлери збережено. Кількість ознак: 89
+2025-06-20 22:35:02,476 - INFO: Розмір масштабованих даних: (70782, 89)
+2025-06-20 22:35:02,483 - INFO: Початок повного навчання
+2025-06-20 22:35:02,595 - INFO: Розмір X: (56614, 10, 89), Розмір Y: (56614,)
+2025-06-20 22:35:02,627 - INFO: Розмір X: (14146, 10, 89), Розмір Y: (14146,)
+2025-06-20 22:35:02,628 - INFO: Перед reshape: trainX.shape=(56614, 10, 89)
+2025-06-20 22:35:02,628 - INFO: Очікуваний розмір: (56614, 10, 89)
+2025-06-20 22:35:02,628 - INFO: Після reshape: trainX.shape=(56614, 10, 89), testX.shape=(14146, 10, 89)
+2025-06-20 22:35:02,628 - INFO: Створення моделі з input_shape: (10, 89)
+2025-06-20 22:37:49,067 - INFO: RMSE: 0.003139
+2025-06-20 22:37:49,068 - INFO: MAE: 0.002793
+2025-06-20 22:37:49,068 - INFO: MAPE: 0.257765%
+2025-06-20 22:37:49,068 - INFO: R²: 0.984559
+2025-06-20 22:37:49,069 - INFO: Час виконання: 2.87 хв
+2025-06-20 22:43:09,819 - INFO: Завантаження даних
+2025-06-20 22:43:15,480 - INFO: Розмір завантажених даних: (70791, 94)
+2025-06-20 22:43:15,480 - INFO: Колонки: ['Close', 'Open', 'High', 'Low', 'Volume', 'ForexSession', 'Hour_sin', 'Hour_cos', 'DayOfWeek_sin', 'DayOfWeek_cos', 'Month_sin', 'Month_cos', 'SMA_5', 'SMA_10', 'SMA_20', 'SMA_50', 'EMA_12', 'EMA_26', 'MACD', 'MACD_Signal', 'MACD_Histogram', 'BB_Upper', 'BB_Lower', 'BB_Width', 'BB_Position', 'ATR', 'Volatility', 'RSI', 'Stoch_K', 'Stoch_D', 'CCI', 'Williams_R', 'ROC', 'Momentum', 'PROC', 'Volume_ROC', 'Volume_MA', 'Volume_Ratio', 'Returns_1', 'Returns_5', 'Returns_10', 'HL_Spread', 'OC_Spread', 'Price_Position', 'Gap', 'Support', 'Resistance', 'Support_Distance', 'Resistance_Distance', 'Close_lag_1', 'Returns_lag_1', 'Volume_lag_1', 'Close_lag_2', 'Returns_lag_2', 'Volume_lag_2', 'Close_lag_3', 'Returns_lag_3', 'Volume_lag_3', 'Close_lag_5', 'Returns_lag_5', 'Volume_lag_5', 'Close_lag_10', 'Returns_lag_10', 'Volume_lag_10', 'Returns_mean_5', 'Returns_std_5', 'Returns_skew_5', 'Returns_kurt_5', 'Volume_mean_5', 'Volume_std_5', 'High_max_5', 'Low_min_5', 'Returns_mean_10', 'Returns_std_10', 'Returns_skew_10', 'Returns_kurt_10', 'Volume_mean_10', 'Volume_std_10', 'High_max_10', 'Low_min_10', 'Returns_mean_20', 'Returns_std_20', 'Returns_skew_20', 'Returns_kurt_20', 'Volume_mean_20', 'Volume_std_20', 'High_max_20', 'Low_min_20', 'Target_1h', 'Target_4h', 'Target_24h', 'Direction_1h', 'Direction_4h', 'High_Volatility']
+2025-06-20 22:43:15,481 - INFO: Завантажено лог тренування. Останній розмір даних: 70782
+2025-06-20 22:43:15,481 - INFO: Скейлери завантажено. Кількість ознак: 89
+2025-06-20 22:43:15,481 - INFO: Виявлено 9 нових записів. Починаємо інкрементальне навчання
+2025-06-20 22:43:15,947 - INFO: Модель завантажено
+2025-06-20 22:43:16,037 - INFO: Розмір даних: (70791, 89)
+2025-06-20 22:43:16,037 - INFO: Кількість ознак: 89
+2025-06-20 22:43:16,037 - INFO: Використання існуючих скейлерів для інкрементального навчання
+2025-06-20 22:43:16,059 - INFO: Розмір масштабованих даних: (70791, 89)
+2025-06-20 22:43:16,072 - INFO: Розмір X: (6, 10, 89), Розмір Y: (6,)
+2025-06-20 22:43:16,073 - INFO: Початок інкрементального навчання
+2025-06-20 22:43:16,073 - INFO: Розмір нових даних: X=(6, 10, 89), Y=(6,)
+2025-06-20 22:43:17,901 - INFO: Розмір X: (39, 10, 89), Розмір Y: (39,)
+2025-06-20 22:43:18,523 - INFO: Інкрементальне навчання завершено
+2025-06-20 22:43:18,523 - INFO: RMSE: 0.001082
+2025-06-20 22:43:18,523 - INFO: MAE: 0.000869
+2025-06-20 22:43:18,523 - INFO: MAPE: 0.075528%
+2025-06-20 22:43:18,523 - INFO: R²: 0.816328
+2025-06-20 22:43:18,524 - INFO: Час виконання: 0.15 хв
